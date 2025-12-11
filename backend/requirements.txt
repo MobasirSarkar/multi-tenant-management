@@ -10,3 +10,4 @@ django-cors-headers>=4.3
 pytest>=8.0
 pytest-django>=4.8
 mixer>=7.2
+django-graphql-jwt>=0.4.0

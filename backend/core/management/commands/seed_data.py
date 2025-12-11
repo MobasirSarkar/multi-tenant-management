@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.contrib.auth.models import User
 from core.models import Organization, Project, Task
 
 
@@ -7,6 +8,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.stdout.write("Seeding data...")
+
+        if not User.objects.filter(username="admin").exists():
+            User.objects.create_superuser("admin", "mobasirwork43@gmail.com", "admin")
+            self.stdout.write(self.style.SUCCESS("Created superuser: admin"))
 
         org_name = "TechNova Solutions"
         org_slug = "technova-solutions"

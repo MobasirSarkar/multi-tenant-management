@@ -1,6 +1,5 @@
-from ast import Del
-from typing import Required
 import graphene
+import graphql_jwt
 from graphene_django import DjangoObjectType
 from .models import Organization, Project, Task, TaskComment, description
 
@@ -44,6 +43,7 @@ class ProjectType(DjangoObjectType):
 class Query(graphene.ObjectType):
     projects = graphene.List(ProjectType, org_slug=graphene.String(required=True))
     project = graphene.Field(ProjectType, id=graphene.ID(required=True))
+    my_tasks = graphene.List(TaskType)
 
     def resolve_projects(self, _info, org_slug):
         return Project.objects.filter(organization__slug=org_slug).order_by(  # type: ignore - "objects" is a dynamic Django manager
@@ -52,6 +52,15 @@ class Query(graphene.ObjectType):
 
     def resolve_project(self, _info, id):
         return Project.objects.get(pk=id)  # type: ignore
+
+    def resolve_my_tasks(self, info):
+        user = info.context.user
+        if not user.is_authenticated:
+            return Task.objects.none()
+
+        return Task.objects.filter(assignee_email=user.email).order_by(
+            "due_date", "-created_at"
+        )[:5]
 
 
 class CreateProjectMutation(graphene.Mutation):
@@ -185,6 +194,12 @@ class UpdateCommentMutation(graphene.Mutation):
 
 
 class Mutation(graphene.ObjectType):
+    # Auth Mutations
+    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
+
+    # Project Mutation
     create_project = CreateProjectMutation.Field()
     update_project = UpdateProjectMutation.Field()
     create_task = CreateTaskMutation.Field()
