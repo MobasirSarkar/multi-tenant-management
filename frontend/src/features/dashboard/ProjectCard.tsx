@@ -25,8 +25,6 @@ export const ProjectCard = ({ project }: { project: ProjectProps }) => {
                 return "outline"
         }
     }
-
-
     return (
         <Link to={`/projects/${project.id}`} className="block h-full">
             <Card className="group flex h-full flex-col justify-between border-2 border-black shadow-none transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none">
@@ -61,7 +59,6 @@ export const ProjectCard = ({ project }: { project: ProjectProps }) => {
                         <span>Progress</span>
                         <span>{progress}%</span>
                     </div>
-                    {/* We customize the Shadcn Progress component class to be square and bordered */}
                     <Progress
                         value={progress}
                         className="h-3 rounded-none border border-black bg-white [&>div]:bg-black"

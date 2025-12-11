@@ -82,7 +82,7 @@ export const CreateProjectModel = ({ orgSlug }: { orgSlug: string }) => {
                         <Textarea
                             id="description"
                             placeholder="Brief overview of goals..."
-                            className="rounded-none border-black focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-black min-h-[80px]"
+                            className="rounded-none border-black focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-black min-h-20"
                             {...register("description")}
                         />
                     </div>

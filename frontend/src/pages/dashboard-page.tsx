@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { GET_PROJECTS } from '../graphql/queries';
-import { Plus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProjectCard, type ProjectProps } from '@/features/dashboard/ProjectCard';
 import { useQuery } from '@apollo/client/react';
