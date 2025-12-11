@@ -1,16 +1,22 @@
 import { Button } from '@/components/ui/button';
-import { GET_PROJECTS } from '../graphql/queries';
+import { GET_DASHBOARD_DATA, GET_PROJECTS } from '../graphql/queries';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProjectCard, type ProjectProps } from '@/features/dashboard/ProjectCard';
 import { useQuery } from '@apollo/client/react';
 import { CreateProjectModel } from '@/features/dashboard/CreateProjectForm';
+import { CheckCircle2, Clock } from 'lucide-react';
 
 const ORG_SLUG = "technova-solutions";
 
 export const DashboardPage = () => {
-    const { loading, error, data } = useQuery(GET_PROJECTS, {
-        variables: { orgSlug: ORG_SLUG },
+    const { loading, error, data } = useQuery(GET_DASHBOARD_DATA, {
+        variables: { orgSlug: ORG_SLUG || "" },
+        skip: !ORG_SLUG,
+        fetchPolicy: "cache-and-network"
     });
+
+    const myTasks = data?.myTasks || [];
+    const projects = data?.projects || [];
 
     if (error) {
         return (
@@ -38,6 +44,40 @@ export const DashboardPage = () => {
                 </div>
                 <CreateProjectModel orgSlug={ORG_SLUG} />
             </header>
+
+            <div className="mb-12">
+                <h2 className="text-xl font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5" /> My Active Tasks
+                </h2>
+
+                {myTasks.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {myTasks.map((task: any) => (
+                            <div key={task.id} className="border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between">
+                                <div>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-[10px] font-bold uppercase bg-gray-100 px-2 py-1 border border-black/10">
+                                            {task.project.name}
+                                        </span>
+                                        <span className={`text-[10px] font-bold uppercase px-2 py-1 border border-black ${task.status === 'DONE' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+                                            {task.status.replace("_", " ")}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-bold text-sm leading-tight mb-1">{task.title}</h3>
+                                </div>
+                                <div className="mt-4 flex items-center text-xs text-gray-500 gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(task.createdAt).toLocaleDateString()}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-8 border-2 border-dashed border-gray-300 text-gray-400 text-center uppercase text-sm">
+                        No active tasks assigned to you.
+                    </div>
+                )}
+            </div>
 
             {/* Grid Content */}
             <main>

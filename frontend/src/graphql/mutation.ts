@@ -57,3 +57,11 @@ export const DELETE_TASK = gql`
     }
   }
 `;
+
+export const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    tokenAuth(username: $username, password: $password) {
+      token
+    }
+  }
+`;
