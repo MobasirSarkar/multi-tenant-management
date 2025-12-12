@@ -45,7 +45,7 @@ export const CreateProjectModel = ({ orgSlug }: { orgSlug: string }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="h-10 rounded-none border-2 border-black bg-black px-6 font-bold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none">
+                <Button className="text-black w-full sm:w-auto h-12 rounded-none border-2 border-black bg-white hover:bg-gray-100 gap-2 uppercase font-bold tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
                     <Plus className="mr-2 h-4 w-4" /> New Project
                 </Button>
             </DialogTrigger>

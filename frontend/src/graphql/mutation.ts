@@ -65,3 +65,28 @@ export const LOGIN_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_PROJECT = gql`
+  mutation UpdateProject($projectId: ID!, $name: String, $description: String, $status: String, $dueDate: Date) {
+    updateProject(projectId: $projectId, name: $name, description: $description, status: $status, dueDate: $dueDate) {
+      project {
+        id
+        name
+        description
+        status
+        dueDate
+      }
+    }
+  }
+`;
+
+export const CREATE_USER = gql`
+  mutation CreateUser($orgSlug: String!, $email: String!, $username: String!, $password: String!) {
+    createUser(orgSlug: $orgSlug, email: $email, username: $username, password: $password) {
+      user {
+        id
+        username
+      }
+    }
+  }
+`;
