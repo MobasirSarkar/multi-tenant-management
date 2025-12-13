@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.http.response import time
 
-# Create your views here.
+
+def health_check(request):
+    res = {
+        "status": "ok",
+        "time": time.time(),
+    }
+    return JsonResponse(res)
