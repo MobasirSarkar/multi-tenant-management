@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 class UserType(DjangoObjectType):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "is_staff"]
+        fields = ["id", "username", "first_name", "last_name", "email", "is_staff"]
 
     organizations = graphene.List(lambda: OrganizationType)
 
@@ -106,9 +106,16 @@ class CreateProjectMutation(graphene.Mutation):
 
     project = graphene.Field(ProjectType)
 
-    def mutate(self, _info, org_slug, name, description="", due_date=None):
+    def mutate(self, info, org_slug, name, description="", due_date=None):
         try:
+            user = info.context.user
+            if not user.is_authenticated:
+                raise Exception("authentication credentials were not provided")
             org = Organization.objects.get(slug=org_slug)
+
+            if not user.is_staff:
+                raise Exception("Only Admins can create projects.")
+
             project = Project.objects.create(
                 organization=org, name=name, description=description, due_date=due_date
             )
@@ -254,9 +261,57 @@ class CreateUserMutation(graphene.Mutation):
         return CreateUserMutation(user=new_user)
 
 
+class UpdateProfileMutation(graphene.Mutation):
+    class Arguments:
+        first_name = graphene.String()
+        last_name = graphene.String()
+        email = graphene.String()
+
+    user = graphene.Field(UserType)
+
+    def mutate(self, info, first_name=None, last_name=None, email=None):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception("Not logged in")
+
+        if first_name is not None:
+            user.first_name = first_name
+        if last_name is not None:
+            user.last_name = last_name
+        if email is not None:
+            if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+                raise Exception("email already in use")
+            user.email = email
+
+        user.save()
+        return UpdateProfileMutation(user=user)
+
+
+class ChangePasswordMutation(graphene.Mutation):
+    class Arguments:
+        old_password = graphene.String(required=True)
+        new_password = graphene.String(required=True)
+
+    success = graphene.Boolean()
+
+    def mutate(self, info, old_password, new_password):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception("not logged in")
+
+        if not user.check_password(old_password):
+            raise Exception("invalid old password")
+
+        user.set_password(new_password)
+        user.save()
+        return ChangePasswordMutation(success=True)
+
+
 class Mutation(graphene.ObjectType):
     # user
     create_user = CreateUserMutation.Field()
+    update_profile = UpdateProfileMutation.Field()
+    change_password = ChangePasswordMutation.Field()
     # Auth Mutations
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     verify_token = graphql_jwt.Verify.Field()

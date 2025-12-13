@@ -6,6 +6,7 @@ import { AuthLayout } from "./layout/AuthLayout";
 import { RootRedirect } from "./features/auth/RootRedirect";
 import { AdminRoute } from "./features/auth/AuthRoute";
 import { TeamSettingsPage } from "./pages/team-settings-page";
+import { ProfilePage } from "./pages/profile-page";
 
 export default function App() {
     return (
@@ -13,6 +14,7 @@ export default function App() {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route element={<AuthLayout />}>
+                    <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/" element={<RootRedirect />} />
                     <Route path="/:orgSlug" element={
                         <DashboardPage />

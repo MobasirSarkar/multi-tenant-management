@@ -5,7 +5,7 @@ import { DndContext, type DragEndEvent, type DragStartEvent, DragOverlay, useSen
 import { ArrowLeft, Calendar, Settings, Clock } from "lucide-react";
 
 // GraphQL
-import { GET_PROJECTS_DETAILS } from "@/graphql/queries";
+import { GET_MY_ORGS, GET_PROJECTS_DETAILS } from "@/graphql/queries";
 import { UPDATE_TASK_STATUS } from "@/graphql/mutation";
 
 // Components
@@ -28,6 +28,11 @@ export const ProjectDetailsPage = () => {
     // --- Router Params (Typed) ---
     const { orgSlug, id } = useParams<{ orgSlug: string; id: string }>();
 
+    const { data: meData } = useQuery(GET_MY_ORGS, {
+        fetchPolicy: "cache-first"
+    })
+
+    const isAdmin = meData?.me?.isStaff
     // --- State ---
     const [updateTaskStatus] = useMutation(UPDATE_TASK_STATUS)
     const [localTasks, setLocalTasks] = useState<Task[]>([]);
@@ -131,24 +136,27 @@ export const ProjectDetailsPage = () => {
                                 </div>
 
                                 {/* RIGHT: Actions */}
+
                                 <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto pt-2 md:pt-0">
                                     <CreateTaskModal projectId={id} />
 
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setIsEditOpen(true)}
-                                        className="rounded-none border-2 border-black hover:bg-gray-100 flex items-center justify-center gap-2 flex-1 md:flex-none"
-                                    >
-                                        <Settings className="w-4 h-4" />
-                                        <span className="md:hidden">Settings</span>
-                                    </Button>
+                                    {isAdmin && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setIsEditOpen(true)}
+                                            className="rounded-none border-2 border-black hover:bg-gray-100 flex items-center justify-center gap-2 flex-1 md:flex-none"
+                                        >
+                                            <Settings className="w-4 h-4" />
+                                            <span className="md:hidden">Settings</span>
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Edit Modal */}
-                    {project && (
+                    {isAdmin && project && (
                         <EditProjectModal
                             project={project}
                             open={isEditOpen}

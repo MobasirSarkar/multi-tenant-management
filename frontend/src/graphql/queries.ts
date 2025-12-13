@@ -99,6 +99,9 @@ export const GET_MY_ORGS = gql`
     me {
       id
       username
+      firstName
+      lastName
+      email
       isStaff
       organizations {
         slug

@@ -90,3 +90,24 @@ export const CREATE_USER = gql`
     }
   }
 `;
+
+export const UPDATE_PROFILE = gql`
+  mutation UpdateProfile($firstName: String, $lastName: String, $email: String) {
+    updateProfile(firstName: $firstName, lastName: $lastName, email: $email) {
+      user {
+        id
+        firstName
+        lastName
+        email
+      }
+    }
+  }
+`;
+
+export const CHANGE_PASSWORD = gql`
+  mutation ChangePassword($oldPassword: String!, $newPassword: String!) {
+    changePassword(oldPassword: $oldPassword, newPassword: $newPassword) {
+      success
+    }
+  }
+`;
