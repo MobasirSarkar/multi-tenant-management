@@ -38,6 +38,17 @@ You only need **Docker** installed to run this entire stack.
 
 -----
 
+## Demo
+<p align="center">
+  <img src="./assets/login_ss.png" alt="Game Preview 1" width="350" />
+  <img src="./assets/landing_ss.png" alt="Game Preview 2" width="350" />
+  <img src="./assets/after_project_ss.png" alt="Game Preview 3" width="350" />
+  <img src="./assets/create_project_ss.png" alt="Game Preview 3" width="350" />
+</p>
+
+### Demo Video Drag-Drop
+![Demo](./assets/demo_drag_drop.gif)
+
 ## Key Features
 
   * **Multi-tenancy:** Strict data isolation based on Organization URL slugs.

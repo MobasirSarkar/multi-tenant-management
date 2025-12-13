@@ -36,10 +36,10 @@ export const LoginPage = () => {
 
                 <div className="z-10">
                     <div className="h-12 w-12 bg-white text-black flex items-center justify-center font-black text-2xl mb-6 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]">
-                        TN
+                        WO
                     </div>
                     <h1 className="text-6xl font-black uppercase tracking-tighter leading-none mb-4">
-                        Technova<br />Solutions
+                        WORK<br />OS
                     </h1>
                     <p className="text-gray-400 max-w-md text-lg">
                         Manage your organizations, projects, and tasks in a strictly ordered environment.
