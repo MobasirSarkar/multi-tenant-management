@@ -40,12 +40,15 @@ You only need **Docker** installed to run this entire stack.
 
 ## Demo
 <p align="center">
-  <img src="./assets/login_ss.png" alt="Game Preview 1" width="350" />
-  <img src="./assets/landing_ss.png" alt="Game Preview 2" width="350" />
-  <img src="./assets/mobile_Ss.png" alt="Game Preview 3" width="350" />
-  <img src="./assets/after_project_ss.png" alt="Game Preview 3" width="350" />
-  <img src="./assets/create_project_ss.png" alt="Game Preview 3" width="350" />
-  <img src="./assets/mobile_view.png" alt="Game Preview 3" width="350" />
+  <img src="./assets/login_ss.png" alt="Login" width="45%" />
+  <img src="./assets/landing_ss.png" alt="Landing" width="45%" />
+  
+  <img src="./assets/mobile_Ss.png" alt="Mobile 1" width="200" />
+  
+  <img src="./assets/after_project_ss.png" alt="Project" width="45%" />
+  <img src="./assets/create_project_ss.png" alt="Create" width="45%" />
+  
+  <img src="./assets/mobile_view.png" alt="Mobile 2" width="200" />
 </p>
 
 ## Demo Video Drag-Drop
