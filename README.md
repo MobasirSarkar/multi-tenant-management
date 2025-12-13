@@ -47,7 +47,7 @@ You only need **Docker** installed to run this entire stack.
 </p>
 
 ### Demo Video Drag-Drop
-![Demo](./assets/drag_drop_demo-ezgif.com-video-to-gif-converter.gif)
+![Demo](./assets/demo_drag_drop.gif)
 
 ## Key Features
 
