@@ -46,7 +46,8 @@ You only need **Docker** installed to run this entire stack.
   <img src="./assets/create_project_ss.png" alt="Game Preview 3" width="350" />
 </p>
 
-## Demo Video Drag-Drop
+### Demo Video Drag-Drop
+![Demo](./assets/drag_drop_demo-ezgif.com-video-to-gif-converter.gif)
 
 ## Key Features
 
