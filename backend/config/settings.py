@@ -72,15 +72,26 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.postgresql",
+#        "NAME": dbConn.path.replace("/", ""),
+#        "USER": dbConn.username,
+#        "PASSWORD": dbConn.password,
+#        "HOST": dbConn.hostname,
+#        "POST": 5432,
+#        "OPTIONS": dict(parse_qsl(dbConn.query)),
+#    }
+# }
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": dbConn.path.replace("/", ""),
-        "USER": dbConn.username,
-        "PASSWORD": dbConn.password,
-        "HOST": dbConn.hostname,
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
         "POST": 5432,
-        "OPTIONS": dict(parse_qsl(dbConn.query)),
     }
 }
 
