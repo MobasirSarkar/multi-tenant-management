@@ -1,7 +1,21 @@
 import graphene
 import graphql_jwt
 from graphene_django import DjangoObjectType
-from .models import Organization, Project, Task, TaskComment, description
+from .models import Organization, Project, Task, TaskComment
+from django.contrib.auth.models import User
+
+
+class UserType(DjangoObjectType):
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email", "is_staff"]
+
+    organizations = graphene.List(lambda: OrganizationType)
+
+    def resolve_organizations(self, info):
+        if hasattr(self, "organizations"):
+            return self.organizations.all()
+        return self.organization_set.all()
 
 
 class OrganizationType(DjangoObjectType):
@@ -41,14 +55,17 @@ class ProjectType(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
+    me = graphene.Field(UserType)
     projects = graphene.List(ProjectType, org_slug=graphene.String(required=True))
     project = graphene.Field(ProjectType, id=graphene.ID(required=True))
     my_tasks = graphene.List(TaskType)
 
-    def resolve_projects(self, _info, org_slug):
-        return Project.objects.filter(organization__slug=org_slug).order_by(  # type: ignore - "objects" is a dynamic Django manager
-            "-created_at"
-        )
+    organization = graphene.Field(OrganizationType, slug=graphene.String(required=True))
+
+    def resolve_projects(self, info, org_slug):
+        user = info.context.user
+        org = check_organization_access(user, org_slug)
+        return Project.objects.filter(organization=org).order_by("-created_at")
 
     def resolve_project(self, _info, id):
         return Project.objects.get(pk=id)  # type: ignore
@@ -56,11 +73,28 @@ class Query(graphene.ObjectType):
     def resolve_my_tasks(self, info):
         user = info.context.user
         if not user.is_authenticated:
-            return Task.objects.none()
+            return []
 
-        return Task.objects.filter(assignee_email=user.email).order_by(
-            "due_date", "-created_at"
-        )[:5]
+        return (
+            Task.objects.filter(
+                assignee_email=user.email,
+                project__organization__members=user,
+                project__status="ACTIVE",
+            )
+            .exclude(status="DONE")
+            .select_related("project")
+            .order_by("-created_at")[:6]
+        )
+
+    def resolve_me(self, info):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception("not logged in!")
+        return user
+
+    def resolve_organization(self, info, slug):
+        user = info.context.user
+        return check_organization_access(user, slug)
 
 
 class CreateProjectMutation(graphene.Mutation):
@@ -72,9 +106,16 @@ class CreateProjectMutation(graphene.Mutation):
 
     project = graphene.Field(ProjectType)
 
-    def mutate(self, _info, org_slug, name, description="", due_date=None):
+    def mutate(self, info, org_slug, name, description="", due_date=None):
         try:
+            user = info.context.user
+            if not user.is_authenticated:
+                raise Exception("authentication credentials were not provided")
             org = Organization.objects.get(slug=org_slug)
+
+            if not user.is_staff:
+                raise Exception("Only Admins can create projects.")
+
             project = Project.objects.create(
                 organization=org, name=name, description=description, due_date=due_date
             )
@@ -88,6 +129,7 @@ class UpdateProjectMutation(graphene.Mutation):
         project_id = graphene.ID(required=True)
         name = graphene.String()
         description = graphene.String()
+        status = graphene.String()
         due_date = graphene.Date()
 
     project = graphene.Field(ProjectType)
@@ -193,7 +235,83 @@ class UpdateCommentMutation(graphene.Mutation):
         return UpdateCommentMutation(comment=comment)
 
 
+class CreateUserMutation(graphene.Mutation):
+    class Arguments:
+        org_slug = graphene.String(required=True)
+        email = graphene.String(required=True)
+        username = graphene.String(required=True)
+        password = graphene.String(required=True)
+
+    user = graphene.Field(lambda: UserType)
+
+    def mutate(self, info, org_slug, email, username, password):
+        requester = info.context.user
+
+        org = check_organization_access(requester, org_slug)
+
+        if User.objects.filter(username=username).exists():
+            raise Exception("Username already taken")
+
+        new_user = User.objects.create_user(
+            username=username, email=email, password=password
+        )
+
+        org.members.add(new_user)
+
+        return CreateUserMutation(user=new_user)
+
+
+class UpdateProfileMutation(graphene.Mutation):
+    class Arguments:
+        first_name = graphene.String()
+        last_name = graphene.String()
+        email = graphene.String()
+
+    user = graphene.Field(UserType)
+
+    def mutate(self, info, first_name=None, last_name=None, email=None):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception("Not logged in")
+
+        if first_name is not None:
+            user.first_name = first_name
+        if last_name is not None:
+            user.last_name = last_name
+        if email is not None:
+            if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+                raise Exception("email already in use")
+            user.email = email
+
+        user.save()
+        return UpdateProfileMutation(user=user)
+
+
+class ChangePasswordMutation(graphene.Mutation):
+    class Arguments:
+        old_password = graphene.String(required=True)
+        new_password = graphene.String(required=True)
+
+    success = graphene.Boolean()
+
+    def mutate(self, info, old_password, new_password):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise Exception("not logged in")
+
+        if not user.check_password(old_password):
+            raise Exception("invalid old password")
+
+        user.set_password(new_password)
+        user.save()
+        return ChangePasswordMutation(success=True)
+
+
 class Mutation(graphene.ObjectType):
+    # user
+    create_user = CreateUserMutation.Field()
+    update_profile = UpdateProfileMutation.Field()
+    change_password = ChangePasswordMutation.Field()
     # Auth Mutations
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     verify_token = graphql_jwt.Verify.Field()
@@ -210,3 +328,16 @@ class Mutation(graphene.ObjectType):
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
+
+
+def check_organization_access(user, org_slug):
+    if not user.is_authenticated:
+        raise Exception("authentication credentials were not provided")
+
+    try:
+        org = Organization.objects.get(slug=org_slug)
+        if not user.is_superuser and user not in org.members.all():
+            raise Exception("you do not have permission to access this organization")
+        return org
+    except Organization.DoesNotExist:
+        raise Exception("Organization not found")

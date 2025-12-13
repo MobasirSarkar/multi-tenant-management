@@ -1,8 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DELETE_TASK, CREATE_COMMENT } from "@/graphql/mutation"; // Fixed import path if needed
-import { GET_PROJECTS_DETAILS } from "@/graphql/queries";
-import { useMutation } from "@apollo/client/react";
+import { GET_MY_ORGS, GET_PROJECTS_DETAILS } from "@/graphql/queries";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
 import { MessageSquare, Send, User, Trash2, Loader2, X } from "lucide-react"; // Added X if you want custom close
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +57,12 @@ export const TaskDetailModal = ({ task, isOpen, onClose, projectId }: TaskDetail
         }
     };
 
-    const CURRENT_USER = "me@technova.com";
+    const { data } = useQuery(GET_MY_ORGS, {
+        fetchPolicy: "cache-first"
+    })
+
+    const CURRENT_USER = data?.me?.email
+
 
     const handleSendComment = () => {
         if (!newComment.trim() || !task) return;

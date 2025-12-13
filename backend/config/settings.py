@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import parse_qsl, urlparse
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,6 +20,8 @@ ALLOWED_HOSTS = []
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Application definition
+
+dbConn = urlparse(os.getenv("DATABASE_URL"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -72,11 +75,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "POST": os.getenv("DB_PORT"),
+        "NAME": dbConn.path.replace("/", ""),
+        "USER": dbConn.username,
+        "PASSWORD": dbConn.password,
+        "HOST": dbConn.hostname,
+        "POST": 5432,
+        "OPTIONS": dict(parse_qsl(dbConn.query)),
     }
 }
 

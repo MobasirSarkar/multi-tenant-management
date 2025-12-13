@@ -30,6 +30,7 @@ export const GET_PROJECTS = gql(
       status
       taskCount
       completedTaskCount
+      dueDate
       tasks {
         id
         title
@@ -47,6 +48,8 @@ export const GET_PROJECTS_DETAILS = gql`
       id
       name
       description
+      status
+      dueDate
       tasks {
         id
         title
@@ -71,6 +74,8 @@ export const GET_PROJECT_DETAILS = gql`
       id
       name
       description
+      status
+      dueDate
       tasks {
         id
         title
@@ -84,6 +89,39 @@ export const GET_PROJECT_DETAILS = gql`
           authorEmail
           createdAt
         }
+      }
+    }
+  }
+`;
+
+export const GET_MY_ORGS = gql`
+  query GetMyOrgs {
+    me {
+      id
+      username
+      firstName
+      lastName
+      email
+      isStaff
+      organizations {
+        slug
+        name
+      }
+    }
+  }
+`;
+
+export const GET_ORG_TEAM = gql`
+  query GetOrgTeam($slug: String!) {
+    organization(slug: $slug) {
+      id
+      name
+      slug
+      members {
+        id
+        username
+        email
+        isStaff
       }
     }
   }
